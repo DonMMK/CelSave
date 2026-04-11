@@ -1,0 +1,6 @@
+{
+  "name": "NetworkTracker",
+  "ios": {
+    "modules": ["NetworkTrackerModule"]
+  }
+}

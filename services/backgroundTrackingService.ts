@@ -4,6 +4,7 @@ import { planService } from "./planService";
 import { notificationService } from "./notificationService";
 import * as BackgroundFetch from "expo-background-fetch";
 import * as TaskManager from "expo-task-manager";
+import { NetworkTracker } from '../modules/network-tracker';
 
 const BACKGROUND_TRACKING_TASK = "BACKGROUND_DATA_TRACKING_TASK";
 const TRACKING_INTERVAL = 5 * 60; // 5 minutes in SECONDS
@@ -176,17 +177,26 @@ export const backgroundTrackingService = {
   },
 
   async callIOSNetworkExtension(): Promise<MockTrafficStats> {
-    const prev = await localStorage.getSystemBaseline();
-    const rx = prev
-      ? prev.mobileRxBytes + Math.floor(Math.random() * (5 * 1024 * 1024))
-      : 0;
-    const tx = prev
-      ? prev.mobileTxBytes + Math.floor(Math.random() * (1 * 1024 * 1024))
-      : 0;
-    return {
-      mobileRxBytes: rx,
-      mobileTxBytes: tx,
-    };
+    try {
+      const stats = await NetworkTracker.getNetworkUsage();
+      return {
+        mobileRxBytes: stats.mobileRxBytes,
+        mobileTxBytes: stats.mobileTxBytes,
+      };
+    } catch (e) {
+      console.warn("Native tracker unavailabe, mocking:", e);
+      const prev = await localStorage.getSystemBaseline();
+      const rx = prev
+        ? prev.mobileRxBytes + Math.floor(Math.random() * (5 * 1024 * 1024))
+        : 0;
+      const tx = prev
+        ? prev.mobileTxBytes + Math.floor(Math.random() * (1 * 1024 * 1024))
+        : 0;
+      return {
+        mobileRxBytes: rx,
+        mobileTxBytes: tx,
+      };
+    }
   },
 
   async getMockStats(timestamp: number): Promise<SystemBaseline> {
