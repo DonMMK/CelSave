@@ -1,7 +1,7 @@
-export type CycleType = 'daily' | 'monthly' | 'yearly';
-export type SetupMethod = 'ocr' | 'manual' | 'carrier_detect';
-export type EntryType = 'manual' | 'ocr' | 'estimated' | 'system';
-export type PeriodType = 'daily' | 'monthly' | 'yearly';
+export type CycleType = "daily" | "monthly" | "yearly";
+export type SetupMethod = "ocr" | "manual" | "carrier_detect";
+export type EntryType = "manual" | "ocr" | "estimated" | "system";
+export type PeriodType = "daily" | "monthly" | "yearly";
 
 export interface UserPlan {
   id: string;

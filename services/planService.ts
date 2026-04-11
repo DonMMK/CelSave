@@ -1,74 +1,74 @@
-import { supabase } from '@/lib/supabase';
-import { UserPlan, CreatePlanData } from '@/types/database';
+import { localStorage } from "@/lib/localStorage";
+import { UserPlan, CreatePlanData } from "@/types/database";
 
 export const planService = {
   async getActivePlan(userId: string): Promise<UserPlan | null> {
-    const { data, error } = await supabase
-      .from('user_plans')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('is_active', true)
-      .maybeSingle();
-
-    if (error) throw error;
-    return data;
+    // Just fetch it from local storage, as there's only one user/plan locally.
+    const plan = await localStorage.getPlan();
+    if (plan && plan.is_active) {
+      return plan;
+    }
+    return null;
   },
 
   async createPlan(
     userId: string,
-    planData: CreatePlanData
+    planData: CreatePlanData,
   ): Promise<UserPlan> {
     const now = new Date();
     const cycleStart = this.calculateCycleStart(
       planData.cycle_type,
       planData.cycle_start_day,
       now,
-      planData.timezone
+      planData.timezone,
     );
     const cycleEnd = this.calculateCycleEnd(
       planData.cycle_type,
       cycleStart,
-      planData.timezone
+      planData.timezone,
     );
 
-    const { data, error } = await supabase
-      .from('user_plans')
-      .insert({
-        user_id: userId,
-        ...planData,
-        current_cycle_start: cycleStart.toISOString(),
-        current_cycle_end: cycleEnd.toISOString(),
-      })
-      .select()
-      .single();
+    const newPlan: UserPlan = {
+      id: `plan_${Date.now()}`,
+      user_id: userId,
+      ...planData,
+      current_cycle_start: cycleStart.toISOString(),
+      current_cycle_end: cycleEnd.toISOString(),
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
 
-    if (error) throw error;
-    return data;
+    await localStorage.setPlan(newPlan);
+    return newPlan;
   },
 
   async updatePlan(planId: string, updates: Partial<UserPlan>): Promise<void> {
-    const { error } = await supabase
-      .from('user_plans')
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id', planId);
-
-    if (error) throw error;
+    const currentPlan = await localStorage.getPlan();
+    if (currentPlan && currentPlan.id === planId) {
+      const updatedPlan = {
+        ...currentPlan,
+        ...updates,
+        updated_at: new Date().toISOString(),
+      };
+      await localStorage.setPlan(updatedPlan);
+    }
   },
 
   calculateCycleStart(
     cycleType: string,
     startDay: number,
     referenceDate: Date,
-    timezone: string
+    timezone: string,
   ): Date {
     const date = new Date(referenceDate);
 
-    if (cycleType === 'daily') {
+    if (cycleType === "daily") {
       date.setHours(0, 0, 0, 0);
       return date;
     }
 
-    if (cycleType === 'monthly') {
+    if (cycleType === "monthly") {
       const currentDay = date.getDate();
       if (currentDay >= startDay) {
         date.setDate(startDay);
@@ -80,7 +80,7 @@ export const planService = {
       return date;
     }
 
-    if (cycleType === 'yearly') {
+    if (cycleType === "yearly") {
       const dayOfYear = this.getDayOfYear(date);
       if (dayOfYear >= startDay) {
         date.setMonth(0, 1);
@@ -100,23 +100,23 @@ export const planService = {
   calculateCycleEnd(
     cycleType: string,
     cycleStart: Date,
-    timezone: string
+    timezone: string,
   ): Date {
     const date = new Date(cycleStart);
 
-    if (cycleType === 'daily') {
+    if (cycleType === "daily") {
       date.setDate(date.getDate() + 1);
       date.setMilliseconds(date.getMilliseconds() - 1);
       return date;
     }
 
-    if (cycleType === 'monthly') {
+    if (cycleType === "monthly") {
       date.setMonth(date.getMonth() + 1);
       date.setMilliseconds(date.getMilliseconds() - 1);
       return date;
     }
 
-    if (cycleType === 'yearly') {
+    if (cycleType === "yearly") {
       date.setFullYear(date.getFullYear() + 1);
       date.setMilliseconds(date.getMilliseconds() - 1);
       return date;
@@ -133,15 +133,15 @@ export const planService = {
   },
 
   getCyclePeriod(cycleType: string, date: Date): string {
-    if (cycleType === 'daily') {
-      return date.toISOString().split('T')[0];
+    if (cycleType === "daily") {
+      return date.toISOString().split("T")[0];
     }
-    if (cycleType === 'monthly') {
-      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    if (cycleType === "monthly") {
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
     }
-    if (cycleType === 'yearly') {
+    if (cycleType === "yearly") {
       return `${date.getFullYear()}`;
     }
-    return '';
+    return "";
   },
 };

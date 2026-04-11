@@ -1,6 +1,7 @@
 # CelSave: Background Data Usage Tracking Architecture
 
 ## The Core Problem
+
 Traditional mobile data trackers rely on manual input or periodic user checks. CelSave solves this by automatically detecting and tracking mobile data usage in the background, providing real-time accuracy without user intervention.
 
 ## Core Logic: How We Track Data Usage
@@ -8,6 +9,7 @@ Traditional mobile data trackers rely on manual input or periodic user checks. C
 ### 1. **Multi-Layer Data Collection Strategy**
 
 #### Layer 1: Android TrafficStats API (Primary - Most Accurate)
+
 - **How it works**: Android's `TrafficStats` class provides system-level network statistics
 - **Data we collect**:
   - `getTotalRxBytes()`: Total bytes received (mobile + WiFi)
@@ -19,12 +21,14 @@ Traditional mobile data trackers rely on manual input or periodic user checks. C
 - **Data freshness**: Updates every 1-2 seconds, system-wide baseline
 
 #### Layer 2: iOS Network Extension Framework
+
 - **How it works**: Captures all network packets at system level
 - **Accuracy**: Exact packet counting
 - **Cost**: Slight battery drain (~2-3%)
 - **Implementation**: NEPacketTunnelProvider background agent
 
 #### Layer 3: Cellular Radios Diagnostic API (Web/Cross-platform)
+
 - **How it works**: Mobile browser APIs that report cellular metrics
 - **Data points**: Signal strength, network type, current data rate
 - **Accuracy**: Good for trend analysis, not absolute bytes
@@ -64,14 +68,15 @@ When billing cycle resets:
 cycle_baseline = {
   mobileRxBytes: system.getMobileRxBytes(),
   mobileTxBytes: system.getMobileTxBytes(),
-  timestamp: cycle_start_date
-}
+  timestamp: cycle_start_date,
+};
 
 // At any point during cycle:
-cycle_usage_mb = (
-  (system.getMobileRxBytes() - cycle_baseline.mobileRxBytes) +
-  (system.getMobileTxBytes() - cycle_baseline.mobileTxBytes)
-) / (1024 * 1024)
+cycle_usage_mb =
+  (system.getMobileRxBytes() -
+    cycle_baseline.mobileRxBytes +
+    (system.getMobileTxBytes() - cycle_baseline.mobileTxBytes)) /
+  (1024 * 1024);
 ```
 
 ### 4. **Background Tracking Process**

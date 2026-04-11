@@ -1,4 +1,4 @@
-import { OCRResult } from '@/types/database';
+import { OCRResult } from "@/types/database";
 
 export const ocrService = {
   async parseScreenshot(imageUri: string): Promise<OCRResult> {
@@ -16,13 +16,13 @@ export const ocrService = {
     }
 
     const carrierPatterns = [
-      'Verizon',
-      'AT&T',
-      'T-Mobile',
-      'Sprint',
-      'Mint',
-      'Visible',
-      'Cricket',
+      "Verizon",
+      "AT&T",
+      "T-Mobile",
+      "Sprint",
+      "Mint",
+      "Visible",
+      "Cricket",
     ];
     for (const carrier of carrierPatterns) {
       if (text.includes(carrier)) {
@@ -32,11 +32,9 @@ export const ocrService = {
       }
     }
 
-    const monthlyMatch = text.match(
-      /(monthly|month|per month|\/mo|\/month)/i
-    );
+    const monthlyMatch = text.match(/(monthly|month|per month|\/mo|\/month)/i);
     if (monthlyMatch) {
-      result.cycle_type = 'monthly';
+      result.cycle_type = "monthly";
       result.confidence += 0.2;
     }
 
@@ -44,13 +42,13 @@ export const ocrService = {
     if (dayMatch) {
       result.cycle_start_day = parseInt(dayMatch[1]);
       result.confidence += 0.2;
-    } else if (result.cycle_type === 'monthly') {
+    } else if (result.cycle_type === "monthly") {
       result.cycle_start_day = 1;
       result.confidence += 0.1;
     }
 
     const planNameMatch = text.match(
-      /(unlimited|prepaid|postpaid|[a-z]+\s+plan)/i
+      /(unlimited|prepaid|postpaid|[a-z]+\s+plan)/i,
     );
     if (planNameMatch) {
       result.plan_name = planNameMatch[0];
@@ -66,29 +64,26 @@ export const ocrService = {
     const response = await fetch(imageUri);
     const blob = await response.blob();
 
-    formData.append('image', blob);
-    formData.append('apikey', 'K88271894388957');
-    formData.append('language', 'eng');
+    formData.append("image", blob);
+    formData.append("apikey", "K88271894388957");
+    formData.append("language", "eng");
 
     try {
-      const ocrResponse = await fetch(
-        'https://api.ocr.space/parse/image',
-        {
-          method: 'POST',
-          body: formData,
-        }
-      );
+      const ocrResponse = await fetch("https://api.ocr.space/parse/image", {
+        method: "POST",
+        body: formData,
+      });
 
       const result = await ocrResponse.json();
 
       if (result.ParsedResults && result.ParsedResults.length > 0) {
-        return result.ParsedResults[0].ParsedText || '';
+        return result.ParsedResults[0].ParsedText || "";
       }
 
-      return '';
+      return "";
     } catch (error) {
-      console.error('OCR failed:', error);
-      return '';
+      console.error("OCR failed:", error);
+      return "";
     }
   },
 };

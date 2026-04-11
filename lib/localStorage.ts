@@ -1,25 +1,25 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   UserPlan,
   UsageEntry,
   NotificationSettings,
   CycleType,
-} from '@/types/database';
+} from "@/types/database";
 
 function generateUUID(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 }
 
-const USER_CONFIG_KEY = '@celsave_user_config';
-const USAGE_ENTRIES_KEY = '@celsave_usage_entries';
-const CYCLE_TRACKING_KEY = '@celsave_cycle_tracking';
-const DAILY_AGGREGATES_KEY = '@celsave_daily_aggregates';
-const NOTIFICATION_SETTINGS_KEY = '@celsave_notification_settings';
-const SYSTEM_BASELINE_KEY = '@celsave_system_baseline';
+const USER_CONFIG_KEY = "@celsave_user_config";
+const USAGE_ENTRIES_KEY = "@celsave_usage_entries";
+const CYCLE_TRACKING_KEY = "@celsave_cycle_tracking";
+const DAILY_AGGREGATES_KEY = "@celsave_daily_aggregates";
+const NOTIFICATION_SETTINGS_KEY = "@celsave_notification_settings";
+const SYSTEM_BASELINE_KEY = "@celsave_system_baseline";
 
 export interface SystemBaseline {
   timestamp: number;
@@ -52,7 +52,7 @@ export const localStorage = {
       const data = await AsyncStorage.getItem(USER_CONFIG_KEY);
       return data ? JSON.parse(data) : null;
     } catch (error) {
-      console.error('Failed to get plan:', error);
+      console.error("Failed to get plan:", error);
       return null;
     }
   },
@@ -61,7 +61,7 @@ export const localStorage = {
     try {
       await AsyncStorage.setItem(USER_CONFIG_KEY, JSON.stringify(plan));
     } catch (error) {
-      console.error('Failed to set plan:', error);
+      console.error("Failed to set plan:", error);
     }
   },
 
@@ -69,7 +69,7 @@ export const localStorage = {
     try {
       await AsyncStorage.removeItem(USER_CONFIG_KEY);
     } catch (error) {
-      console.error('Failed to clear plan:', error);
+      console.error("Failed to clear plan:", error);
     }
   },
 
@@ -79,12 +79,14 @@ export const localStorage = {
       const data = await AsyncStorage.getItem(USAGE_ENTRIES_KEY);
       return data ? JSON.parse(data) : [];
     } catch (error) {
-      console.error('Failed to get usage entries:', error);
+      console.error("Failed to get usage entries:", error);
       return [];
     }
   },
 
-  async addUsageEntry(entry: Omit<UsageEntry, 'id' | 'created_at'>): Promise<UsageEntry> {
+  async addUsageEntry(
+    entry: Omit<UsageEntry, "id" | "created_at">,
+  ): Promise<UsageEntry> {
     try {
       const entries = await this.getUsageEntries();
       const newEntry: UsageEntry = {
@@ -96,7 +98,7 @@ export const localStorage = {
       await AsyncStorage.setItem(USAGE_ENTRIES_KEY, JSON.stringify(entries));
       return newEntry;
     } catch (error) {
-      console.error('Failed to add usage entry:', error);
+      console.error("Failed to add usage entry:", error);
       throw error;
     }
   },
@@ -108,7 +110,7 @@ export const localStorage = {
         .filter((e) => e.cycle_period === cyclePeriod)
         .reduce((sum, e) => sum + Number(e.usage_mb), 0);
     } catch (error) {
-      console.error('Failed to get cycle usage:', error);
+      console.error("Failed to get cycle usage:", error);
       return 0;
     }
   },
@@ -121,10 +123,10 @@ export const localStorage = {
         .sort(
           (a, b) =>
             new Date(b.recorded_at).getTime() -
-            new Date(a.recorded_at).getTime()
+            new Date(a.recorded_at).getTime(),
         );
     } catch (error) {
-      console.error('Failed to get cycle entries:', error);
+      console.error("Failed to get cycle entries:", error);
       return [];
     }
   },
@@ -135,7 +137,7 @@ export const localStorage = {
       const filtered = entries.filter((e) => e.id !== entryId);
       await AsyncStorage.setItem(USAGE_ENTRIES_KEY, JSON.stringify(filtered));
     } catch (error) {
-      console.error('Failed to delete usage entry:', error);
+      console.error("Failed to delete usage entry:", error);
     }
   },
 
@@ -145,7 +147,7 @@ export const localStorage = {
       const data = await AsyncStorage.getItem(CYCLE_TRACKING_KEY);
       return data ? JSON.parse(data) : null;
     } catch (error) {
-      console.error('Failed to get cycle tracking:', error);
+      console.error("Failed to get cycle tracking:", error);
       return null;
     }
   },
@@ -154,7 +156,7 @@ export const localStorage = {
     try {
       await AsyncStorage.setItem(CYCLE_TRACKING_KEY, JSON.stringify(tracking));
     } catch (error) {
-      console.error('Failed to set cycle tracking:', error);
+      console.error("Failed to set cycle tracking:", error);
     }
   },
 
@@ -166,7 +168,7 @@ export const localStorage = {
         await this.setCycleTracking(tracking);
       }
     } catch (error) {
-      console.error('Failed to update last reading:', error);
+      console.error("Failed to update last reading:", error);
     }
   },
 
@@ -176,18 +178,24 @@ export const localStorage = {
       const data = await AsyncStorage.getItem(DAILY_AGGREGATES_KEY);
       return data ? JSON.parse(data) : {};
     } catch (error) {
-      console.error('Failed to get daily aggregates:', error);
+      console.error("Failed to get daily aggregates:", error);
       return {};
     }
   },
 
-  async setDailyAggregate(date: string, aggregate: DailyAggregate): Promise<void> {
+  async setDailyAggregate(
+    date: string,
+    aggregate: DailyAggregate,
+  ): Promise<void> {
     try {
       const aggregates = await this.getDailyAggregates();
       aggregates[date] = aggregate;
-      await AsyncStorage.setItem(DAILY_AGGREGATES_KEY, JSON.stringify(aggregates));
+      await AsyncStorage.setItem(
+        DAILY_AGGREGATES_KEY,
+        JSON.stringify(aggregates),
+      );
     } catch (error) {
-      console.error('Failed to set daily aggregate:', error);
+      console.error("Failed to set daily aggregate:", error);
     }
   },
 
@@ -197,7 +205,7 @@ export const localStorage = {
       const aggregates: { [date: string]: DailyAggregate } = {};
 
       entries.forEach((entry) => {
-        const date = entry.recorded_at.split('T')[0];
+        const date = entry.recorded_at.split("T")[0];
         if (!aggregates[date]) {
           aggregates[date] = {
             date,
@@ -212,7 +220,7 @@ export const localStorage = {
         aggregates[date].entry_count += 1;
         aggregates[date].peak_mb = Math.max(
           aggregates[date].peak_mb,
-          Number(entry.usage_mb)
+          Number(entry.usage_mb),
         );
       });
 
@@ -221,9 +229,12 @@ export const localStorage = {
         agg.avg_per_hour = agg.total_usage_mb / hours;
       });
 
-      await AsyncStorage.setItem(DAILY_AGGREGATES_KEY, JSON.stringify(aggregates));
+      await AsyncStorage.setItem(
+        DAILY_AGGREGATES_KEY,
+        JSON.stringify(aggregates),
+      );
     } catch (error) {
-      console.error('Failed to generate daily aggregates:', error);
+      console.error("Failed to generate daily aggregates:", error);
     }
   },
 
@@ -233,7 +244,7 @@ export const localStorage = {
       const data = await AsyncStorage.getItem(NOTIFICATION_SETTINGS_KEY);
       return data ? JSON.parse(data) : null;
     } catch (error) {
-      console.error('Failed to get notification settings:', error);
+      console.error("Failed to get notification settings:", error);
       return null;
     }
   },
@@ -242,22 +253,28 @@ export const localStorage = {
     try {
       await AsyncStorage.setItem(
         NOTIFICATION_SETTINGS_KEY,
-        JSON.stringify(settings)
+        JSON.stringify(settings),
       );
     } catch (error) {
-      console.error('Failed to set notification settings:', error);
+      console.error("Failed to set notification settings:", error);
     }
   },
 
-  async updateNotificationSettings(updates: Partial<NotificationSettings>): Promise<void> {
+  async updateNotificationSettings(
+    updates: Partial<NotificationSettings>,
+  ): Promise<void> {
     try {
       const settings = await this.getNotificationSettings();
       if (settings) {
-        const updated = { ...settings, ...updates, updated_at: new Date().toISOString() };
+        const updated = {
+          ...settings,
+          ...updates,
+          updated_at: new Date().toISOString(),
+        };
         await this.setNotificationSettings(updated);
       }
     } catch (error) {
-      console.error('Failed to update notification settings:', error);
+      console.error("Failed to update notification settings:", error);
     }
   },
 
@@ -267,7 +284,7 @@ export const localStorage = {
       const data = await AsyncStorage.getItem(SYSTEM_BASELINE_KEY);
       return data ? JSON.parse(data) : null;
     } catch (error) {
-      console.error('Failed to get system baseline:', error);
+      console.error("Failed to get system baseline:", error);
       return null;
     }
   },
@@ -276,7 +293,7 @@ export const localStorage = {
     try {
       await AsyncStorage.setItem(SYSTEM_BASELINE_KEY, JSON.stringify(baseline));
     } catch (error) {
-      console.error('Failed to set system baseline:', error);
+      console.error("Failed to set system baseline:", error);
     }
   },
 
@@ -292,7 +309,7 @@ export const localStorage = {
         SYSTEM_BASELINE_KEY,
       ]);
     } catch (error) {
-      console.error('Failed to clear all data:', error);
+      console.error("Failed to clear all data:", error);
     }
   },
 };

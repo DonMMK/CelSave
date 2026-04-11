@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,20 +9,20 @@ import {
   ActivityIndicator,
   RefreshControl,
   Platform,
-} from 'react-native';
-import { useRouter } from 'expo-router';
+} from "react-native";
+import { useRouter } from "expo-router";
 import {
   CirclePlus as PlusCircle,
   TrendingUp,
   TriangleAlert as AlertTriangle,
   CircleCheck as CheckCircle,
   Settings,
-} from 'lucide-react-native';
-import { localStorage } from '@/lib/localStorage';
-import { planService } from '@/services/planService';
-import { backgroundTrackingService } from '@/services/backgroundTrackingService';
-import { notificationService } from '@/services/notificationService';
-import { UserPlan } from '@/types/database';
+} from "lucide-react-native";
+import { localStorage } from "@/lib/localStorage";
+import { planService } from "@/services/planService";
+import { backgroundTrackingService } from "@/services/backgroundTrackingService";
+import { notificationService } from "@/services/notificationService";
+import { UserPlan } from "@/types/database";
 
 export default function UsageTab() {
   const router = useRouter();
@@ -31,7 +31,7 @@ export default function UsageTab() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showAddUsage, setShowAddUsage] = useState(false);
-  const [newUsageMb, setNewUsageMb] = useState('');
+  const [newUsageMb, setNewUsageMb] = useState("");
 
   useEffect(() => {
     loadData();
@@ -41,7 +41,7 @@ export default function UsageTab() {
     try {
       const activePlan = await localStorage.getPlan();
       if (!activePlan) {
-        router.replace('/onboarding');
+        router.replace("/onboarding");
         return;
       }
 
@@ -49,12 +49,12 @@ export default function UsageTab() {
 
       const cyclePeriod = planService.getCyclePeriod(
         activePlan.cycle_type,
-        new Date()
+        new Date(),
       );
       const usage = await localStorage.getCycleUsage(cyclePeriod);
       setCurrentUsageMb(usage);
     } catch (error) {
-      console.error('Failed to load data:', error);
+      console.error("Failed to load data:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -72,18 +72,18 @@ export default function UsageTab() {
 
   const handleCancelPress = () => {
     setShowAddUsage(false);
-    setNewUsageMb('');
+    setNewUsageMb("");
   };
 
   const handleSavePress = async () => {
-    if (!plan || !newUsageMb || newUsageMb.trim() === '') {
+    if (!plan || !newUsageMb || newUsageMb.trim() === "") {
       return;
     }
 
     try {
       const cyclePeriod = planService.getCyclePeriod(
         plan.cycle_type,
-        new Date()
+        new Date(),
       );
 
       const usageValue = parseFloat(newUsageMb);
@@ -94,16 +94,16 @@ export default function UsageTab() {
       await localStorage.addUsageEntry({
         plan_id: plan.id,
         usage_mb: usageValue,
-        entry_type: 'manual',
+        entry_type: "manual",
         recorded_at: new Date().toISOString(),
         cycle_period: cyclePeriod,
       });
 
-      setNewUsageMb('');
+      setNewUsageMb("");
       setShowAddUsage(false);
       await loadData();
     } catch (error) {
-      console.error('Failed to add usage:', error);
+      console.error("Failed to add usage:", error);
     }
   };
 
@@ -126,9 +126,9 @@ export default function UsageTab() {
   const limitGb = (plan.data_limit_mb / 1024).toFixed(2);
 
   const getStatusColor = () => {
-    if (usagePercentage >= 100) return '#ef4444';
-    if (usagePercentage >= 80) return '#f59e0b';
-    return '#10b981';
+    if (usagePercentage >= 100) return "#ef4444";
+    if (usagePercentage >= 80) return "#f59e0b";
+    return "#10b981";
   };
 
   const getStatusIcon = () => {
@@ -140,9 +140,9 @@ export default function UsageTab() {
   };
 
   const getStatusText = () => {
-    if (usagePercentage >= 100) return 'Limit Exceeded';
-    if (usagePercentage >= 80) return 'Approaching Limit';
-    return 'On Track';
+    if (usagePercentage >= 100) return "Limit Exceeded";
+    if (usagePercentage >= 80) return "Approaching Limit";
+    return "On Track";
   };
 
   return (
@@ -151,13 +151,14 @@ export default function UsageTab() {
         contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-        }>
+        }
+      >
         <View style={styles.header}>
           <View>
             <Text style={styles.headerTitle}>Data Usage</Text>
             <Text style={styles.headerSubtitle}>
               {plan.cycle_type.charAt(0).toUpperCase() +
-                plan.cycle_type.slice(1)}{' '}
+                plan.cycle_type.slice(1)}{" "}
               cycle
             </Text>
           </View>
@@ -185,7 +186,8 @@ export default function UsageTab() {
                 style={[
                   styles.usageValue,
                   remainingMb < 0 && styles.negativeValue,
-                ]}>
+                ]}
+              >
                 {remainingGb} GB
               </Text>
               <Text style={styles.usageLabel}>Remaining</Text>
@@ -211,7 +213,8 @@ export default function UsageTab() {
         {!showAddUsage && (
           <TouchableOpacity
             style={styles.addButton}
-            onPress={handleAddUsagePress}>
+            onPress={handleAddUsagePress}
+          >
             <PlusCircle size={24} color="#fff" />
             <Text style={styles.addButtonText}>Add Usage</Text>
           </TouchableOpacity>
@@ -234,7 +237,8 @@ export default function UsageTab() {
             <View style={styles.buttonRow}>
               <TouchableOpacity
                 style={styles.cancelButton}
-                onPress={handleCancelPress}>
+                onPress={handleCancelPress}
+              >
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -243,7 +247,8 @@ export default function UsageTab() {
                   !newUsageMb.trim() && styles.saveButtonDisabled,
                 ]}
                 onPress={handleSavePress}
-                disabled={!newUsageMb.trim()}>
+                disabled={!newUsageMb.trim()}
+              >
                 <Text style={styles.saveButtonText}>Save</Text>
               </TouchableOpacity>
             </View>
@@ -254,12 +259,12 @@ export default function UsageTab() {
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Carrier</Text>
             <Text style={styles.infoValue}>
-              {plan.carrier_name || 'Not set'}
+              {plan.carrier_name || "Not set"}
             </Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Plan</Text>
-            <Text style={styles.infoValue}>{plan.plan_name || 'Not set'}</Text>
+            <Text style={styles.infoValue}>{plan.plan_name || "Not set"}</Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Cycle</Text>
@@ -272,7 +277,7 @@ export default function UsageTab() {
             <Text style={styles.infoLabel}>Renews on</Text>
             <Text style={styles.infoValue}>
               Day {plan.cycle_start_day}
-              {plan.cycle_type === 'yearly' ? ' of year' : ''}
+              {plan.cycle_type === "yearly" ? " of year" : ""}
             </Text>
           </View>
         </View>
@@ -284,7 +289,7 @@ export default function UsageTab() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    backgroundColor: "#f9fafb",
   },
   scrollContent: {
     padding: 20,
@@ -293,84 +298,84 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 24,
   },
   headerTitle: {
     fontSize: 32,
-    fontWeight: '700',
-    color: '#111827',
+    fontWeight: "700",
+    color: "#111827",
   },
   headerSubtitle: {
     fontSize: 14,
-    color: '#6b7280',
+    color: "#6b7280",
     marginTop: 4,
   },
   statusCard: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 16,
     padding: 20,
     borderWidth: 2,
     marginBottom: 20,
   },
   statusHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
     marginBottom: 20,
   },
   statusText: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   usageStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 20,
   },
   usageStat: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   usageValue: {
     fontSize: 24,
-    fontWeight: '700',
-    color: '#111827',
+    fontWeight: "700",
+    color: "#111827",
   },
   negativeValue: {
-    color: '#ef4444',
+    color: "#ef4444",
   },
   usageLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    color: "#6b7280",
     marginTop: 4,
   },
   progressBarContainer: {
     height: 12,
-    backgroundColor: '#e5e7eb',
+    backgroundColor: "#e5e7eb",
     borderRadius: 6,
-    overflow: 'hidden',
+    overflow: "hidden",
     marginBottom: 8,
   },
   progressBar: {
-    height: '100%',
+    height: "100%",
     borderRadius: 6,
   },
   percentageText: {
     fontSize: 14,
-    color: '#6b7280',
-    textAlign: 'center',
+    color: "#6b7280",
+    textAlign: "center",
   },
   addButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#3b82f6',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#3b82f6",
     paddingVertical: 16,
     paddingHorizontal: 24,
     borderRadius: 12,
@@ -379,19 +384,19 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
+    fontWeight: "600",
+    color: "#fff",
   },
   addUsageCard: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 16,
     padding: 20,
     marginBottom: 20,
   },
   addUsageTitle: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#111827',
+    fontWeight: "700",
+    color: "#111827",
     marginBottom: 16,
   },
   inputGroup: {
@@ -400,21 +405,21 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
+    fontWeight: "600",
+    color: "#374151",
   },
   input: {
-    backgroundColor: '#f9fafb',
+    backgroundColor: "#f9fafb",
     borderWidth: 1,
-    borderColor: '#d1d5db',
+    borderColor: "#d1d5db",
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 16,
     fontSize: 16,
-    color: '#111827',
+    color: "#111827",
   },
   buttonRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
   },
   cancelButton: {
@@ -422,48 +427,48 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#d1d5db',
-    alignItems: 'center',
+    borderColor: "#d1d5db",
+    alignItems: "center",
   },
   cancelButtonText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#6b7280',
+    fontWeight: "600",
+    color: "#6b7280",
   },
   saveButton: {
     flex: 1,
     paddingVertical: 12,
     borderRadius: 8,
-    backgroundColor: '#3b82f6',
-    alignItems: 'center',
+    backgroundColor: "#3b82f6",
+    alignItems: "center",
   },
   saveButtonDisabled: {
     opacity: 0.5,
   },
   saveButtonText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
+    fontWeight: "600",
+    color: "#fff",
   },
   infoCard: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 16,
     padding: 20,
   },
   infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
+    borderBottomColor: "#f3f4f6",
   },
   infoLabel: {
     fontSize: 14,
-    color: '#6b7280',
+    color: "#6b7280",
   },
   infoValue: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#111827',
+    fontWeight: "600",
+    color: "#111827",
   },
 });

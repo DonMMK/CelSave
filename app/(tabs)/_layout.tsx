@@ -1,23 +1,24 @@
-import { Tabs } from 'expo-router';
-import { ChartBar as BarChart3, Activity } from 'lucide-react-native';
+import { Tabs } from "expo-router";
+import { ChartBar as BarChart3, Activity } from "lucide-react-native";
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#3b82f6',
-        tabBarInactiveTintColor: '#9ca3af',
+        tabBarActiveTintColor: "#3b82f6",
+        tabBarInactiveTintColor: "#9ca3af",
         tabBarStyle: {
-          backgroundColor: '#ffffff',
+          backgroundColor: "#ffffff",
           borderTopWidth: 1,
-          borderTopColor: '#e5e7eb',
+          borderTopColor: "#e5e7eb",
         },
-      }}>
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Usage',
+          title: "Usage",
           tabBarIcon: ({ size, color }) => (
             <Activity size={size} color={color} />
           ),
@@ -26,7 +27,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="analytics"
         options={{
-          title: 'Analytics',
+          title: "Analytics",
           tabBarIcon: ({ size, color }) => (
             <BarChart3 size={size} color={color} />
           ),
