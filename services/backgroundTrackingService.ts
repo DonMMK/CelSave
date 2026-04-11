@@ -4,7 +4,7 @@ import { planService } from "./planService";
 import { notificationService } from "./notificationService";
 import * as BackgroundFetch from "expo-background-fetch";
 import * as TaskManager from "expo-task-manager";
-import { NetworkTracker } from '../modules/network-tracker';
+import { NetworkTracker } from "../modules/network-tracker";
 
 const BACKGROUND_TRACKING_TASK = "BACKGROUND_DATA_TRACKING_TASK";
 const TRACKING_INTERVAL = 5 * 60; // 5 minutes in SECONDS

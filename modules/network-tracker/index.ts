@@ -1,4 +1,4 @@
-import { requireNativeModule } from 'expo-modules-core';
+import { requireNativeModule } from "expo-modules-core";
 
 export interface NetworkTrackerProps {
   requestPermissions(): Promise<boolean>;
@@ -6,4 +6,5 @@ export interface NetworkTrackerProps {
   getNetworkUsage(): Promise<{ mobileRxBytes: number; mobileTxBytes: number }>;
 }
 
-export const NetworkTracker = requireNativeModule<NetworkTrackerProps>('NetworkTracker');
+export const NetworkTracker =
+  requireNativeModule<NetworkTrackerProps>("NetworkTracker");
